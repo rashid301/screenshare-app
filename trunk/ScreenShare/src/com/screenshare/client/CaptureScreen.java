@@ -13,22 +13,23 @@ public class CaptureScreen {
 	 */
 	Robot robot;
 	BufferedImage screenshot;
-	public CaptureScreen(){
-		try {
-			robot = new Robot();
-		} catch (AWTException e) {
-			// TODO Auto-generated catch block
-			System.err.println("Robot error");
-			e.printStackTrace();
+	private static CaptureScreen cs = null;
+
+	public static CaptureScreen getInstance() {
+		if (cs == null) {
+			cs = new CaptureScreen();
 		}
-		
+		return cs;
 	}
-	
-	public BufferedImage getScreen(){
-		screenshot = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+
+	public BufferedImage getScreen() throws AWTException {
+		robot = new Robot();
+
+		screenshot = robot.createScreenCapture(new Rectangle(Toolkit
+				.getDefaultToolkit().getScreenSize()));
 		return screenshot;
 	}
-	
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		new CaptureScreen();
