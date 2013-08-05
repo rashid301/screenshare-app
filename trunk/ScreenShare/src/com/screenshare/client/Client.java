@@ -3,6 +3,8 @@ package com.screenshare.client;
 import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +13,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 public class Client extends JFrame {
 
@@ -19,8 +21,7 @@ public class Client extends JFrame {
 
 	private int screenHeight = 480;
 	// time between frames now time per screenshot is 500ms
-	private final int fps = 10;
-	private int interval = 0;
+	private final int timePerFrame = 100;
 
 	// Jlabel to display the image on the panel
 	private JLabel image;
@@ -28,8 +29,39 @@ public class Client extends JFrame {
 	// variable to add the screenshot image
 	private ImageIcon screen;
 
+	// BufferredImage to get the image
+	private BufferedImage screenShot;
+
 	// create a capture screen instance(only one per client app)
 	private CaptureScreen captureScreen;
+
+	// scaled Image
+	private Image scaledImage;
+
+	private ActionListener action = new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			// action to be performed
+			captureScreen = CaptureScreen.getInstance();
+			try {
+				// get the screenshot image
+				remove(image);
+				screenShot = captureScreen.getScreen();
+				// scaling the image
+				scaledImage = screenShot.getScaledInstance(screenWidth,
+						screenHeight, Image.SCALE_SMOOTH);
+				screen.setImage(scaledImage);
+				image.setIcon(screen);
+				add(image, BorderLayout.CENTER);
+				repaint();
+			} catch (AWTException awtException) {
+				awtException.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	};
 
 	public Client() throws IOException {
 		// preparing the GUI for hosting
@@ -37,9 +69,9 @@ public class Client extends JFrame {
 		super("Client Interface");
 
 		// Default image
-		BufferedImage bf = ImageIO.read(new File("hello.jpg"));
+		screenShot = ImageIO.read(new File("viewvc.png"));
 		// scaling the image
-		Image scaledImage = bf.getScaledInstance(screenWidth, screenHeight,
+		scaledImage = screenShot.getScaledInstance(screenWidth, screenHeight,
 				Image.SCALE_SMOOTH);
 		// ImageIcon for JLabel
 		screen = new ImageIcon(scaledImage);
@@ -49,62 +81,16 @@ public class Client extends JFrame {
 		add(image, BorderLayout.CENTER);
 		// setting the Jframe properties
 		setSize(screenWidth, screenHeight);
-
-		interval = 1000 / fps;
 		setVisible(true);
-
-	}
-
-	public void display(BufferedImage bf) {
-
-		// scaling the image
-		Image scaledImage = bf.getScaledInstance(screenWidth, screenHeight,
-				Image.SCALE_SMOOTH);
-		// ImageIcon for JLabel
-		screen = new ImageIcon(scaledImage);
-		// Jlabel for showing the Image on screen
-		image.setVisible(false);
-		image = new JLabel(screen);
-		// adding the image to the screen
-		add(image, BorderLayout.CENTER);
-		// setting the Jframe properties
-		setSize(screenWidth, screenHeight);
-		setVisible(true);
-
 	}
 
 	public void clientRunner() {
-		try {
-			CaptureScreen cs = CaptureScreen.getInstance();
-			while (true) {
-				display(cs.getScreen());
-				long starttime = System.currentTimeMillis();
-				long delay = 0l;
-				while (delay < interval) {
-					delay = System.currentTimeMillis() - starttime;
-				}
-			}
-
-		} catch (Exception e) {
+		try{
+			Timer timer = new Timer(timePerFrame, action);
+			timer.start();
+		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
-
-	public void update(final boolean tof) {
-		captureScreen = CaptureScreen.getInstance();
-		try {
-
-			// get the screenshot image
-			BufferedImage screenShot = captureScreen.getScreen();
-			// scaling the image
-			Image scaledImage = screenShot.getScaledInstance(screenWidth,
-					screenHeight, Image.SCALE_SMOOTH);
-			screen.setImage(scaledImage);
-		} catch (AWTException awtException) {
-			awtException.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
+	
 }
