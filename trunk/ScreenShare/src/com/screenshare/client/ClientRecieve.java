@@ -17,7 +17,7 @@ import javax.swing.Timer;
 
 import com.screenshare.share.ReceiveImage;
 
-public class Client extends JFrame {
+public class ClientRecieve extends JFrame {
 
 	private int screenWidth = 640;
 
@@ -60,7 +60,6 @@ public class Client extends JFrame {
 		try {
 			// get the screenshot image
 			remove(image);
-			
 			// scaling the image
 			scaledImage = cs.getScaledInstance(screenWidth,
 					screenHeight, Image.SCALE_SMOOTH);
@@ -73,7 +72,7 @@ public class Client extends JFrame {
 		}
 	}
 
-	public Client() throws IOException {
+	public ClientRecieve() throws IOException {
 		// preparing the GUI for hosting
 
 		super("Client Interface");
@@ -96,8 +95,14 @@ public class Client extends JFrame {
 
 	public void clientRunner() {
 		try{
-			Timer timer = new Timer(timePerFrame, action);
-			timer.start();
+			ReceiveImage ri = new ReceiveImage();
+			
+			/*Timer timer = new Timer(timePerFrame, action);
+			timer.start();*/
+			while(true){
+				screenShot = ri.receive();
+				updateScreen(screenShot);
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
